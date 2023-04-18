@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
     #define MAINWINDOW_H
 
+    #include <QDesktopWidget>
     #include <QApplication>
     #include <QMouseEvent>
     #include <QMainWindow>
@@ -30,6 +31,7 @@
             bool open_serial_port();
             void change_ui();
             void grab_image();
+            void remove_screen_cast_rect();
 
             Ui::MainWindow *ui;
             Screen_Cast_Rect *widg_rndr = nullptr;

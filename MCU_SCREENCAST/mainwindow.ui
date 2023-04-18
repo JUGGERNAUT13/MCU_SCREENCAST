@@ -30,11 +30,31 @@
     <property name="spacing">
      <number>5</number>
     </property>
-    <item row="1" column="4">
-     <widget class="QPushButton" name="pshBttn_tst_stop">
+    <item row="3" column="4">
+     <widget class="QComboBox" name="cmbBx_tst_trnsfrmtn_mod">
       <property name="enabled">
        <bool>false</bool>
       </property>
+      <property name="currentText">
+       <string notr="true">Fast Transformation</string>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <item>
+       <property name="text">
+        <string>Fast Transformation</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Smooth Transformation</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QCheckBox" name="chckBx_tst_scale_img">
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -48,62 +68,11 @@
        </font>
       </property>
       <property name="text">
-       <string notr="true">Stop</string>
+       <string notr="true">Scale Image</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="3">
-     <widget class="QPushButton" name="pshBttn_tst_strt">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Tahoma</family>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string notr="true">Start</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0" colspan="5">
-     <widget class="QLabel" name="lbl_tst_screen">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QPushButton" name="pshBttn_tst_show">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Tahoma</family>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string notr="true">Show</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
+    <item row="2" column="1">
      <widget class="QPushButton" name="pshBttn_tst_hide">
       <property name="enabled">
        <bool>false</bool>
@@ -125,7 +94,36 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="2">
+    <item row="0" column="0" colspan="5">
+     <widget class="QLabel" name="lbl_tst_screen">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QPushButton" name="pshBttn_tst_show">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>25</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Tahoma</family>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string notr="true">Show</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
      <widget class="QPushButton" name="pshBttn_tst_grab">
       <property name="enabled">
        <bool>false</bool>
@@ -147,8 +145,11 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QCheckBox" name="chckBx_tst_scale_img">
+    <item row="2" column="3">
+     <widget class="QPushButton" name="pshBttn_tst_strt">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -162,12 +163,12 @@
        </font>
       </property>
       <property name="text">
-       <string notr="true">Scale Image</string>
+       <string notr="true">Start</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
-     <widget class="QLabel" name="lbl_tst_aspct_ratio">
+    <item row="3" column="3">
+     <widget class="QLabel" name="lbl_tst_trnsfrmtn_mod">
       <property name="enabled">
        <bool>false</bool>
       </property>
@@ -178,14 +179,36 @@
        </font>
       </property>
       <property name="text">
-       <string notr="true">Aspect Ratio:</string>
+       <string notr="true">Transformation Mode:</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>
-    <item row="2" column="2">
+    <item row="2" column="4">
+     <widget class="QPushButton" name="pshBttn_tst_stop">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>25</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Tahoma</family>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string notr="true">Stop</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="2">
      <widget class="QComboBox" name="cmbBx_tst_aspct_ratio">
       <property name="enabled">
        <bool>false</bool>
@@ -213,8 +236,8 @@
       </item>
      </widget>
     </item>
-    <item row="2" column="3">
-     <widget class="QLabel" name="lbl_tst_trnsfrmtn_mod">
+    <item row="3" column="1">
+     <widget class="QLabel" name="lbl_tst_aspct_ratio">
       <property name="enabled">
        <bool>false</bool>
       </property>
@@ -225,34 +248,18 @@
        </font>
       </property>
       <property name="text">
-       <string notr="true">Transformation Mode:</string>
+       <string notr="true">Aspect Ratio:</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>
-    <item row="2" column="4">
-     <widget class="QComboBox" name="cmbBx_tst_trnsfrmtn_mod">
-      <property name="enabled">
-       <bool>false</bool>
+    <item row="1" column="0" colspan="5">
+     <widget class="QCheckBox" name="chckBx_tst_invrs">
+      <property name="text">
+       <string notr="true">Inverse</string>
       </property>
-      <property name="currentText">
-       <string notr="true">Fast Transformation</string>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <item>
-       <property name="text">
-        <string>Fast Transformation</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Smooth Transformation</string>
-       </property>
-      </item>
      </widget>
     </item>
    </layout>

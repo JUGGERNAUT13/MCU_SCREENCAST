@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 #define BYTE    8
-#define WAIT_MS 16
+#define WAIT_MS 60
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
@@ -22,21 +22,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         tmr->setInterval(WAIT_MS);
         tmr->start();
     });
+    this->setWindowTitle("MCU SCREENCAST");
 }
 
 MainWindow::~MainWindow() {
     tmr->stop();
     delete tmr;
     delete serial;
-    if(widg_rndr) {
-        delete widg_rndr;
-    }
+    remove_screen_cast_rect();
     delete ui;
 }
 
 void MainWindow::closeEvent(QCloseEvent *) {
-    widg_rndr->hide();
-    delete widg_rndr;
+    remove_screen_cast_rect();
 }
 
 void MainWindow::on_pshBttn_tst_show_clicked() {
@@ -72,7 +70,7 @@ bool MainWindow::open_serial_port() {
     serial->setBaudRate(921600);
     serial->setDataBits(QSerialPort::Data8);
     serial->setParity(QSerialPort::NoParity);
-    serial->setStopBits(QSerialPort::OneStop);
+//    serial->setStopBits(QSerialPort::OneStop);
     serial->setFlowControl(QSerialPort::NoFlowControl);
     if(!serial->open(QIODevice::WriteOnly)) {
         qDebug() << "serial port not opened";
@@ -92,23 +90,22 @@ void MainWindow::change_ui() {
 void MainWindow::grab_image() {
     QPixmap pxmp;
     QScreen *screen = QGuiApplication::primaryScreen();
-    uint8_t brdr_wdth = widg_rndr->get_border_width();
-    pxmp = screen->grabWindow(0, (widg_rndr->x() + brdr_wdth), (widg_rndr->y() + brdr_wdth), (widg_rndr->width() - (brdr_wdth * 2)), (widg_rndr->height() - (brdr_wdth * 2)));
+    uint16_t brdr_wdth = widg_rndr->get_border_width();
+    QDesktopWidget *dw = QApplication::desktop();
+    pxmp = screen->grabWindow(dw->winId(), (widg_rndr->x() + brdr_wdth), (widg_rndr->y() + brdr_wdth), (widg_rndr->width() - (brdr_wdth * 2)), (widg_rndr->height() - (brdr_wdth * 2)));
     if((pxmp.width() == (widg_rndr->width() - (brdr_wdth * 2))) && (pxmp.height() == (widg_rndr->height() - (brdr_wdth * 2)))) {
         QByteArray tmp;
         uint8_t tmp_byte;
         QBitmap bm(pxmp);
-        if(ui->chckBx_tst_scale_img->isChecked()) {
-            bm = bm.scaled(ui->lbl_tst_screen->size(), static_cast<Qt::AspectRatioMode>(ui->cmbBx_tst_aspct_ratio->currentIndex()),
-                                                       static_cast<Qt::TransformationMode>(ui->cmbBx_tst_trnsfrmtn_mod->currentIndex()));
-        }
-        ui->lbl_tst_screen->setPixmap(bm);
         QImage img = bm.toImage();
-        for(uint16_t cur_wdth_pix = 0; cur_wdth_pix < img.width(); cur_wdth_pix++) {
-            for(uint16_t cur_hght_pix = 0; cur_hght_pix < (img.height() / BYTE); cur_hght_pix++) {
+        for(uint16_t cur_hght_pix = 0; cur_hght_pix < (img.height() / BYTE); cur_hght_pix++) {
+            for(uint16_t cur_wdth_pix = 0; cur_wdth_pix < img.width(); cur_wdth_pix++) {
                 tmp_byte = 0;
                 for(uint8_t i = 0; i < BYTE; i++) {
                     tmp_byte += static_cast<bool>(img.pixelColor(cur_wdth_pix, ((BYTE * cur_hght_pix) + i)).value()) << i;
+                }
+                if(ui->chckBx_tst_invrs->isChecked()) {
+                    tmp_byte ^= 0xFF;
                 }
                 tmp.append(tmp_byte);
             }
@@ -116,8 +113,21 @@ void MainWindow::grab_image() {
         if(serial_available) {
             serial->write(tmp);
         }
+        if(ui->chckBx_tst_scale_img->isChecked()) {
+            bm = bm.scaled(ui->lbl_tst_screen->size(), static_cast<Qt::AspectRatioMode>(ui->cmbBx_tst_aspct_ratio->currentIndex()),
+                                                       static_cast<Qt::TransformationMode>(ui->cmbBx_tst_trnsfrmtn_mod->currentIndex()));
+        }
+        ui->lbl_tst_screen->setPixmap(bm);
     } else {
         qDebug() << "grab failed";
+    }
+}
+
+void MainWindow::remove_screen_cast_rect() {
+    if(widg_rndr) {
+        widg_rndr->hide();
+        delete widg_rndr;
+        widg_rndr = nullptr;
     }
 }
 
@@ -161,16 +171,16 @@ void Screen_Cast_Rect::set_border_width(uint8_t _border_width) {
     this->border_width = _border_width;
     this->setFixedSize((base_width + (border_width * 2)), (base_height + (border_width * 2)));
     QVector<QPoint> border_points;
-    border_points.push_back(QPoint(0, 0));
-    border_points.push_back(QPoint(this->width(), 0));
+    border_points.push_back(QPoint(-1, -1));
+    border_points.push_back(QPoint(this->width(), -1));
     border_points.push_back(QPoint(this->width(), this->height()));
-    border_points.push_back(QPoint(0, this->height()));
-    border_points.push_back(QPoint(0, 0));
-    border_points.push_back(QPoint(border_width, border_width));
-    border_points.push_back(QPoint((this->width() - border_width), border_width));
+    border_points.push_back(QPoint(-1, this->height()));
+    border_points.push_back(QPoint(-1, -1));
+    border_points.push_back(QPoint((border_width - 1), (border_width - 1)));
+    border_points.push_back(QPoint((this->width() - border_width), (border_width - 1)));
     border_points.push_back(QPoint((this->width() - border_width), (this->height() - border_width)));
-    border_points.push_back(QPoint(border_width, (this->height() - border_width)));
-    border_points.push_back(QPoint(border_width, border_width));
+    border_points.push_back(QPoint((border_width - 1), (this->height() - border_width)));
+    border_points.push_back(QPoint((border_width - 1), (border_width - 1)));
     border = QPolygon(border_points);
     this->draw_border();
 }
