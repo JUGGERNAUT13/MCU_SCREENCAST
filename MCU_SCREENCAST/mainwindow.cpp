@@ -170,8 +170,10 @@ void Screen_Cast_Rect::set_border_width(uint8_t _border_width) {
 }
 
 void Screen_Cast_Rect::draw_border() {
-    QPainter painter(this);
-    painter.setPen(QPen(QColor(100, 100, 100, 255), Qt::SolidLine));
-    painter.setBrush(QBrush(QColor(100, 100, 100, 255)));
-    painter.drawPolygon(border);
+    if(this->isVisible()) {
+        QPainter painter(this);
+        painter.setPen(QPen(QColor(100, 100, 100, 255), Qt::SolidLine));
+        painter.setBrush(QBrush(QColor(100, 100, 100, 255)));
+        painter.drawPolygon(border);
+    }
 }
