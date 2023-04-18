@@ -168,6 +168,9 @@
     </item>
     <item row="2" column="1">
      <widget class="QLabel" name="lbl_tst_aspct_ratio">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="font">
        <font>
         <family>Tahoma</family>
@@ -184,6 +187,9 @@
     </item>
     <item row="2" column="2">
      <widget class="QComboBox" name="cmbBx_tst_aspct_ratio">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="currentText">
        <string notr="true">Keep Aspect Ratio</string>
       </property>
@@ -209,6 +215,9 @@
     </item>
     <item row="2" column="3">
      <widget class="QLabel" name="lbl_tst_trnsfrmtn_mod">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="font">
        <font>
         <family>Tahoma</family>
@@ -225,6 +234,9 @@
     </item>
     <item row="2" column="4">
      <widget class="QComboBox" name="cmbBx_tst_trnsfrmtn_mod">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="currentText">
        <string notr="true">Fast Transformation</string>
       </property>

@@ -10,6 +10,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     serial = new QSerialPort(this);
     serial_available = open_serial_port();
     tmr = new QTimer();
+    connect(ui->chckBx_tst_scale_img, &QAbstractButton::toggled, this, [=](bool tggld) {
+        ui->lbl_tst_aspct_ratio->setEnabled(tggld);
+        ui->cmbBx_tst_aspct_ratio->setEnabled(tggld);
+        ui->lbl_tst_trnsfrmtn_mod->setEnabled(tggld);
+        ui->cmbBx_tst_trnsfrmtn_mod->setEnabled(tggld);
+    });
     connect(tmr, &QTimer::timeout, this, [=]() {
         tmr->stop();
         grab_image();
@@ -117,7 +123,7 @@ void MainWindow::grab_image() {
 
 //////////////////////////////////////Screen_Cast_Rect/////////////////////////////////////////////////////////////
 Screen_Cast_Rect::Screen_Cast_Rect(QWidget *parent) : QWidget(parent) {
-    this->setWindowFlags(this->windowFlags() | Qt::FramelessWindowHint);
+    this->setWindowFlags(this->windowFlags() | Qt::Tool | Qt::FramelessWindowHint);
     this->setAttribute(Qt::WA_TranslucentBackground);
     this->set_border_width(border_width);
 }
