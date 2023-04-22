@@ -1,6 +1,10 @@
 #ifndef MAINWINDOW_H
     #define MAINWINDOW_H
 
+    #define BYTE            8
+    #define MEASURE_TIME    0
+//    #define WAIT_MS         60
+
     #include <QDesktopWidget>
     #include <QApplication>
     #include <QMouseEvent>
@@ -11,7 +15,10 @@
     #include <QScreen>
     #include <QBitmap>
     #include <QPainter>
-    #include <QTimer>
+#if MEASURE_TIME
+    #include <QElapsedTimer>
+#endif
+//    #include <QTimer>
 
     QT_BEGIN_NAMESPACE
     namespace Ui {
@@ -36,7 +43,10 @@
             Ui::MainWindow *ui;
             Screen_Cast_Rect *widg_rndr = nullptr;
             QSerialPort *serial = nullptr;
-            QTimer *tmr = nullptr;
+#if MEASURE_TIME
+            QElapsedTimer *tmr = nullptr;
+#endif
+//            QTimer *tst_tmr = nullptr;
 
             bool serial_available = false;
             bool grab_started = false;

@@ -1,35 +1,44 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#define BYTE    8
-#define WAIT_MS 60
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     widg_rndr = new Screen_Cast_Rect(nullptr);
     serial = new QSerialPort(this);
     serial_available = open_serial_port();
-    tmr = new QTimer();
+#if MEASURE_TIME
+    tmr = new QElapsedTimer();
+#endif
     connect(ui->chckBx_tst_scale_img, &QAbstractButton::toggled, this, [=](bool tggld) {
         ui->lbl_tst_aspct_ratio->setEnabled(tggld);
         ui->cmbBx_tst_aspct_ratio->setEnabled(tggld);
         ui->lbl_tst_trnsfrmtn_mod->setEnabled(tggld);
         ui->cmbBx_tst_trnsfrmtn_mod->setEnabled(tggld);
     });
-    connect(tmr, &QTimer::timeout, this, [=]() {
-        tmr->stop();
-        grab_image();
-        tmr->setInterval(WAIT_MS);
-        tmr->start();
+    connect(serial, &QSerialPort::readyRead, this, [=]() {
+        if(grab_started) {
+#if MEASURE_TIME
+            qDebug() << tmr->restart() << "disp:" << serial->readAll();
+#endif
+            grab_image();
+        }
     });
-    this->setWindowTitle("MCU SCREENCAST");
+//    tst_tmr = new QTimer();
+//    connect(tst_tmr, &QTimer::timeout, this, [=]() {
+//        tst_tmr->stop();
+//        grab_image();
+//        tst_tmr->setInterval(WAIT_MS);
+//        tst_tmr->start();
+//    });
+    this->setWindowTitle("MCU_SCREENCAST");
 }
 
 MainWindow::~MainWindow() {
-    tmr->stop();
-    delete tmr;
-    delete serial;
     remove_screen_cast_rect();
+#if MEASURE_TIME
+    delete tmr;
+#endif
+    delete serial;
     delete ui;
 }
 
@@ -40,6 +49,7 @@ void MainWindow::closeEvent(QCloseEvent *) {
 void MainWindow::on_pshBttn_tst_show_clicked() {
     widg_rndr->show();
     change_ui();
+    widg_rndr->move((this->x() + (this->width() / 2) - (widg_rndr->width() / 2)), (this->y() + (this->height() / 2) - (widg_rndr->height() / 2)));
 }
 
 void MainWindow::on_pshBttn_tst_hide_clicked() {
@@ -52,14 +62,18 @@ void MainWindow::on_pshBttn_tst_grab_clicked() {
 }
 
 void MainWindow::on_pshBttn_tst_strt_clicked() {
-    tmr->setInterval(WAIT_MS);
-    tmr->start();
+//    tst_tmr->setInterval(WAIT_MS);
+//    tst_tmr->start();
     grab_started = true;
     change_ui();
+    grab_image();
+#if MEASURE_TIME
+    tmr->restart();
+#endif
 }
 
 void MainWindow::on_pshBttn_tst_stop_clicked() {
-    tmr->stop();
+//    tst_tmr->stop();
     grab_started = false;
     change_ui();
 }
@@ -67,12 +81,13 @@ void MainWindow::on_pshBttn_tst_stop_clicked() {
 bool MainWindow::open_serial_port() {
     serial->setPortName("/dev/ttyACM0");
 //    serial->setBaudRate(QSerialPort::Baud115200);
-    serial->setBaudRate(921600);
+//    serial->setBaudRate(921600);
+    serial->setBaudRate(4000000);
     serial->setDataBits(QSerialPort::Data8);
     serial->setParity(QSerialPort::NoParity);
-//    serial->setStopBits(QSerialPort::OneStop);
+    serial->setStopBits(QSerialPort::OneStop);
     serial->setFlowControl(QSerialPort::NoFlowControl);
-    if(!serial->open(QIODevice::WriteOnly)) {
+    if(!serial->open(QIODevice::ReadWrite)) {
         qDebug() << "serial port not opened";
         return false;
     }
@@ -89,6 +104,7 @@ void MainWindow::change_ui() {
 
 void MainWindow::grab_image() {
     QPixmap pxmp;
+//    QPixmap pxmp("/mnt/D/Arduino projects/Graphical LCD Exploring/ST7920_I2C/doom.bmp");
     QScreen *screen = QGuiApplication::primaryScreen();
     uint16_t brdr_wdth = widg_rndr->get_border_width();
     QDesktopWidget *dw = QApplication::desktop();
@@ -124,6 +140,8 @@ void MainWindow::grab_image() {
 }
 
 void MainWindow::remove_screen_cast_rect() {
+    grab_started = false;
+    serial_available = false;
     if(widg_rndr) {
         widg_rndr->hide();
         delete widg_rndr;
@@ -133,8 +151,13 @@ void MainWindow::remove_screen_cast_rect() {
 
 //////////////////////////////////////Screen_Cast_Rect/////////////////////////////////////////////////////////////
 Screen_Cast_Rect::Screen_Cast_Rect(QWidget *parent) : QWidget(parent) {
-    this->setWindowFlags(this->windowFlags() | Qt::Tool | Qt::FramelessWindowHint);
+//    this->setWindowFlags(this->windowFlags() | Qt::Tool | Qt::FramelessWindowHint);
     this->setAttribute(Qt::WA_TranslucentBackground);
+#ifdef __linux__
+    this->setWindowFlags(Qt::ToolTip | Qt::FramelessWindowHint);
+#else
+    this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+#endif
     this->set_border_width(border_width);
 }
 
