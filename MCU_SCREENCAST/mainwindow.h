@@ -1,24 +1,21 @@
 #ifndef MAINWINDOW_H
     #define MAINWINDOW_H
 
-    #define BYTE            8
-    #define MEASURE_TIME    0
-//    #define WAIT_MS         60
+    #define BYTE                        8
 
     #include <QDesktopWidget>
+    #include <QElapsedTimer>
     #include <QApplication>
     #include <QMouseEvent>
     #include <QMainWindow>
     #include <QSerialPort>
+    #include <QMessageBox>
     #include <QWidget>
     #include <QDebug>
     #include <QScreen>
     #include <QBitmap>
     #include <QPainter>
-#if MEASURE_TIME
-    #include <QElapsedTimer>
-#endif
-//    #include <QTimer>
+    #include <QTimer>
 
     QT_BEGIN_NAMESPACE
     namespace Ui {
@@ -39,17 +36,17 @@
             void change_ui();
             void grab_image();
             void remove_screen_cast_rect();
+            int show_message_box(QString title, QString message, QMessageBox::Icon type, QWidget *parent);
 
             Ui::MainWindow *ui;
             Screen_Cast_Rect *widg_rndr = nullptr;
             QSerialPort *serial = nullptr;
-#if MEASURE_TIME
-            QElapsedTimer *tmr = nullptr;
-#endif
-//            QTimer *tst_tmr = nullptr;
-
+            QElapsedTimer *tmr_elpsd_time = nullptr;
+            QTimer *tmr = nullptr;
+            uint8_t *tmp_scr = nullptr;
             bool serial_available = false;
             bool grab_started = false;
+            bool frst_time_strt = true;
 
         private slots:
             void closeEvent(QCloseEvent *) override;
@@ -64,11 +61,12 @@
     class Screen_Cast_Rect : public QWidget {
         Q_OBJECT
         public:
-            Screen_Cast_Rect(QWidget *parent = nullptr);
+            Screen_Cast_Rect(QWidget *parent = nullptr, bool scrncst_alwys_on_top = false);
             ~Screen_Cast_Rect();
 
             uint8_t get_border_width();
             void set_border_width(uint8_t _border_width);
+            void set_screencast_always_on_top(bool scrncst_alwys_on_top);
 
         private:
             void paintEvent(QPaintEvent *) override;
@@ -79,6 +77,7 @@
 
             QPolygon border;
             QPoint clck_pos;
+            Qt::WindowFlags dflt_wndw_flgs;
 
             uint8_t base_width = 128;
             uint8_t base_height = 64;
