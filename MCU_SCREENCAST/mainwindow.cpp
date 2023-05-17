@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->chckBx_tst_msr_time->setEnabled(tggld);
         ui->lbl_tst_msr_time->setEnabled(tggld);
         ui->lbl_tst_msr_time->clear();
-        if(!frst_time_strt) {
+        if(grab_started) {
             tmr->stop();
             on_pshBttn_tst_strt_clicked();
         }
@@ -86,6 +86,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() {
     remove_screen_cast_rect();
     delete tmr_elpsd_time;
+    delete tmr;
     delete serial;
     delete ui;
 }
@@ -222,12 +223,16 @@ void MainWindow::grab_image() {
 }
 
 void MainWindow::remove_screen_cast_rect() {
-    grab_started = false;
-    serial_available = false;
+    if(grab_started) {
+        on_pshBttn_tst_stop_clicked();
+    }
     if(widg_rndr) {
         widg_rndr->hide();
         delete widg_rndr;
         widg_rndr = nullptr;
+    }
+    if(serial_available) {
+        emit ui->pshBttn_tst_close_port->clicked();
     }
 }
 
