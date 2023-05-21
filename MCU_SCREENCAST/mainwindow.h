@@ -1,8 +1,6 @@
 #ifndef MAINWINDOW_H
     #define MAINWINDOW_H
 
-    #define BYTE                        8
-
     #include <QDesktopWidget>
     #include <QElapsedTimer>
     #include <QApplication>
@@ -10,11 +8,12 @@
     #include <QMainWindow>
     #include <QSerialPort>
     #include <QMessageBox>
-    #include <QWidget>
-    #include <QDebug>
-    #include <QScreen>
-    #include <QBitmap>
     #include <QPainter>
+    #include <QWidget>
+    #include <QScreen>
+    #include <QCursor>
+    #include <QBitmap>
+    #include <QDebug>
     #include <QTimer>
 
     QT_BEGIN_NAMESPACE
@@ -66,24 +65,32 @@
 
             uint8_t get_border_width();
             void set_border_width(uint8_t _border_width);
+            uint8_t get_screencast_move_value();
+            void set_screencast_move_value(uint8_t _scrncst_move_pix);
             void set_screencast_always_on_top(bool scrncst_alwys_on_top);
 
         private:
-            void paintEvent(QPaintEvent *) override;
-            void mousePressEvent(QMouseEvent *event) override;
-            void mouseMoveEvent(QMouseEvent *event) override;
-            void mouseReleaseEvent(QMouseEvent *event) override;
             void draw_border();
 
             QPolygon border;
             QPoint clck_pos;
             Qt::WindowFlags dflt_wndw_flgs;
-
+            QCursor mouse_curs;
             uint8_t base_width = 128;
             uint8_t base_height = 64;
             uint8_t border_width = 5;
-
+            uint8_t scrncst_move_pix = 1;
             bool is_drag = false;
+            bool inside_widget = false;
+
+        private slots:
+            void paintEvent(QPaintEvent *) override;
+            void mousePressEvent(QMouseEvent *event) override;
+            void mouseMoveEvent(QMouseEvent *event) override;
+            void mouseReleaseEvent(QMouseEvent *event) override;
+            void enterEvent(QEvent *) override;
+            void leaveEvent(QEvent *) override;
+            void keyReleaseEvent(QKeyEvent *event) override;
     };
 
 #endif // MAINWINDOW_H

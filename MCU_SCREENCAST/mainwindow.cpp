@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#define BYTE    8
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     widg_rndr = new Screen_Cast_Rect(nullptr, ui->chckBx_tst_scale_img->isChecked());
@@ -18,6 +20,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->pshBttn_tst_open_port->setEnabled(!serial_available);
         ui->pshBttn_tst_close_port->setEnabled(serial_available);
     };
+    connect(ui->spnBx_move_scnrcst_pix, QOverload<int>::of(&QSpinBox::valueChanged), this, [=](int val) {
+        widg_rndr->set_screencast_move_value(val);
+    });
     connect(ui->pshBttn_tst_open_port, &QAbstractButton::clicked, this, [=]() {
         switch_serial(open_serial_port());
     });
@@ -31,8 +36,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->chckBx_tst_send_on_rqst, &QAbstractButton::toggled, this, [=](bool tggld) {
         ui->lbl_send_timeout->setEnabled(!tggld);
         ui->spnBx_tst_send_timeout->setEnabled(!tggld);
-        ui->chckBx_tst_msr_time->setEnabled(tggld);
-        ui->lbl_tst_msr_time->setEnabled(tggld);
         ui->lbl_tst_msr_time->clear();
         if(grab_started) {
             tmr->stop();
@@ -66,11 +69,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     tmr_elpsd_time = new QElapsedTimer();
     connect(serial, &QSerialPort::readyRead, this, [=]() {
         if(ui->chckBx_tst_send_on_rqst->isChecked() && grab_started) {
-            if(ui->chckBx_tst_msr_time->isChecked()) {
-                ui->lbl_tst_msr_time->setText(QString::number(tmr_elpsd_time->restart()) + " msec");
-//                qDebug() << "disp:" << serial->readAll();
-            }
             grab_image();
+        }
+        if(ui->chckBx_tst_msr_time->isChecked()) {
+            ui->lbl_tst_msr_time->setText(QString::number(tmr_elpsd_time->restart()) + " msec");
+//            qDebug() << "disp:" << serial->readAll();
         }
     });
     tmr = new QTimer();
@@ -127,9 +130,9 @@ void MainWindow::on_pshBttn_tst_strt_clicked() {
     change_ui();
     if(ui->chckBx_tst_send_on_rqst->isChecked()) {
         grab_image();
-        if(ui->chckBx_tst_msr_time->isChecked()) {
-            tmr_elpsd_time->restart();
-        }
+    }
+    if(ui->chckBx_tst_msr_time->isChecked()) {
+        tmr_elpsd_time->restart();
     }
 }
 
@@ -298,6 +301,31 @@ void Screen_Cast_Rect::mouseReleaseEvent(QMouseEvent *event) {
     }
 }
 
+void Screen_Cast_Rect::enterEvent(QEvent *) {
+    inside_widget = true;
+    this->grabKeyboard();
+}
+
+void Screen_Cast_Rect::leaveEvent(QEvent *) {
+    inside_widget = false;
+    this->releaseKeyboard();
+}
+
+void Screen_Cast_Rect::keyReleaseEvent(QKeyEvent *event) {
+    if(inside_widget) {
+        if((event->key() == Qt::Key_Up) || (event->key() == Qt::Key_W)) {
+            this->move(this->x(), (this->y() - scrncst_move_pix));
+        } else if((event->key() == Qt::Key_Down) || (event->key() == Qt::Key_S)) {
+            this->move(this->x(), (this->y() + scrncst_move_pix));
+        } else if((event->key() == Qt::Key_Left) || (event->key() == Qt::Key_A)) {
+            this->move((this->x() - scrncst_move_pix), this->y());
+        } else if((event->key() == Qt::Key_Right) || (event->key() == Qt::Key_D)) {
+            this->move((this->x() + scrncst_move_pix), this->y());
+        }
+        mouse_curs.setPos((this->x() + (this->width() / 2)), (this->y() + (this->height() / 2)));
+    }
+}
+
 uint8_t Screen_Cast_Rect::get_border_width() {
     return border_width;
 }
@@ -310,6 +338,14 @@ void Screen_Cast_Rect::set_border_width(uint8_t _border_width) {
                        QPoint((this->width() - border_width), (this->height() - border_width)), QPoint((border_width - 1), (this->height() - border_width)),
                        QPoint((border_width - 1), (border_width - 1))});
     this->draw_border();
+}
+
+uint8_t Screen_Cast_Rect::get_screencast_move_value() {
+    return scrncst_move_pix;
+}
+
+void Screen_Cast_Rect::set_screencast_move_value(uint8_t _scrncst_move_pix) {
+    this->scrncst_move_pix = _scrncst_move_pix;
 }
 
 void Screen_Cast_Rect::set_screencast_always_on_top(bool scrncst_alwys_on_top) {
